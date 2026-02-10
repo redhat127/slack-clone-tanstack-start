@@ -5,7 +5,7 @@ import { tanstackConfig } from '@tanstack/eslint-config'
 export default [
   ...tanstackConfig,
   {
-    ignores: ['*.config.js'],
+    ignores: ['*.config.js', 'src/components/ui/**'],
   },
   {
     rules: {

@@ -1,4 +1,5 @@
 import { relations } from 'drizzle-orm'
+import type { InferSelectModel } from 'drizzle-orm'
 import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
@@ -13,6 +14,10 @@ export const user = pgTable('user', {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 })
+
+export type UserSelect = Omit<InferSelectModel<typeof user>, 'image'> & {
+  image?: string | null | undefined
+}
 
 export const session = pgTable(
   'session',
