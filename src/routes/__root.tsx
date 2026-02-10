@@ -12,6 +12,7 @@ import appCss from '../styles.css?url'
 
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { pageTitle } from '@/lib/utils'
 import { getUser } from '@/serverFn'
 import type { QueryClient } from '@tanstack/react-query'
 
@@ -30,7 +31,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: pageTitle('A Tanstack Start Project'),
       },
     ],
     links: [
