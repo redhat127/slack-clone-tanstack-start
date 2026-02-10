@@ -1,5 +1,6 @@
 import { authClient } from '@/lib/auth-client'
-import { useNavigate } from '@tanstack/react-router'
+import { workspacesQueryKey } from '@/query-options/workspace'
+import { useNavigate, useRouteContext } from '@tanstack/react-router'
 import { LogOutIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -7,6 +8,7 @@ import { toast } from 'sonner'
 export const LogoutForm = () => {
   const [isPending, setIsPending] = useState(false)
   const navigate = useNavigate()
+  const { queryClient } = useRouteContext({ from: '__root__' })
   return (
     <form
       className="w-full"
@@ -22,6 +24,9 @@ export const LogoutForm = () => {
           if (result.success) {
             toast.success('You are logged out.')
             navigate({ to: '/', replace: true })
+            queryClient.removeQueries({
+              queryKey: workspacesQueryKey,
+            })
           }
         } catch {
           toast.error('Failed to logout. try again.')

@@ -1,6 +1,7 @@
-import { relations } from 'drizzle-orm'
 import type { InferSelectModel } from 'drizzle-orm'
+import { relations } from 'drizzle-orm'
 import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { customAlphabet, nanoid } from 'nanoid'
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -81,6 +82,7 @@ export const verification = pgTable(
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  workspaces: many(workspace),
 }))
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -93,6 +95,41 @@ export const sessionRelations = relations(session, ({ one }) => ({
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
+    references: [user.id],
+  }),
+}))
+
+const generateJoinCode = customAlphabet(
+  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  8,
+)
+
+export const workspace = pgTable(
+  'workspace',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
+    name: text('name').notNull(),
+    joinCode: text('join_code')
+      .notNull()
+      .unique()
+      .$defaultFn(() => generateJoinCode()),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index('workspace_userId_idx').on(table.userId)],
+)
+
+export const workspaceRelations = relations(workspace, ({ one }) => ({
+  user: one(user, {
+    fields: [workspace.userId],
     references: [user.id],
   }),
 }))
