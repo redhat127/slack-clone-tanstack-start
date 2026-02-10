@@ -12,9 +12,9 @@ import { workspacesQueryKey } from '@/query-options/workspace'
 import { createWorkspace } from '@/serverFn/workspace'
 import { createWorkspaceSchema } from '@/zod-schema/workspace/create-workspace'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouteContext } from '@tanstack/react-router'
-import {  useState } from 'react'
-import type {ReactNode} from 'react';
+import { useQueryClient } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { SubmitBtn } from '../submit-btn'
@@ -22,7 +22,7 @@ import { TextInput } from '../text-input'
 import { FieldGroup } from '../ui/field'
 
 export const CreateWorkspaceDialog = ({ trigger }: { trigger: ReactNode }) => {
-  const { queryClient } = useRouteContext({ from: '/_auth/workspace' })
+  const queryClient = useQueryClient()
   const [isOpen, setIsOpen] = useState(false)
   const form = useForm({
     resolver: zodResolver(createWorkspaceSchema),

@@ -1,6 +1,7 @@
 import { authClient } from '@/lib/auth-client'
 import { workspacesQueryKey } from '@/query-options/workspace'
-import { useNavigate, useRouteContext } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import { LogOutIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -8,7 +9,7 @@ import { toast } from 'sonner'
 export const LogoutForm = () => {
   const [isPending, setIsPending] = useState(false)
   const navigate = useNavigate()
-  const { queryClient } = useRouteContext({ from: '__root__' })
+  const queryClient = useQueryClient()
   return (
     <form
       className="w-full"

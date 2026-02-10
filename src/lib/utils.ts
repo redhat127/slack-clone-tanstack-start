@@ -10,3 +10,10 @@ export function cn(...inputs: Array<ClassValue>) {
 export const pageTitle = (title: string) => {
   return `${env.VITE_APP_NAME} - ${title}`
 }
+
+export const capitalizeWords = (str: string) => {
+  return str
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}

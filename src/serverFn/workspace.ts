@@ -9,14 +9,73 @@ import z from 'zod'
 export const getUserWorkspaces = createServerFn({ method: 'GET' })
   .middleware([isAuthenticated])
   .handler(async ({ context: { userId } }) => {
-    return db.query.workspace.findMany({
+    const members = await db.query.member.findMany({
       where(fields, operators) {
         return operators.eq(fields.userId, userId)
       },
+      columns: { workspaceId: true, role: true, createdAt: true },
       orderBy(fields, operators) {
         return operators.desc(fields.createdAt)
       },
     })
+
+    if (!members.length) return []
+
+    const workspaceIds = members.map((m) => m.workspaceId)
+
+    const workspaces = await db.query.workspace.findMany({
+      where(fields, operators) {
+        return operators.inArray(fields.id, workspaceIds)
+      },
+    })
+
+    // Create workspace map for quick lookup
+    const workspaceMap = new Map(workspaces.map((w) => [w.id, w]))
+
+    // Return in the order of members.createdAt (already sorted)
+    return members
+      .map((m) => {
+        const workspace = workspaceMap.get(m.workspaceId)
+        if (!workspace) return null
+        return {
+          ...workspace,
+          isAdmin: m.role === 'admin',
+          isCreator: workspace.userId === userId,
+        }
+      })
+      .filter((w) => w !== null)
+  })
+
+export const getUserWorkspace = createServerFn({ method: 'GET' })
+  .middleware([isAuthenticated])
+  .inputValidator(
+    z.object({
+      workspaceId: z.string(),
+    }),
+  )
+  .handler(async ({ context: { userId }, data: { workspaceId } }) => {
+    const isMember = await db.query.member.findFirst({
+      where(fields, operators) {
+        return operators.and(
+          operators.eq(fields.workspaceId, workspaceId),
+          operators.eq(fields.userId, userId),
+        )
+      },
+    })
+    if (!isMember) return { workspace: null }
+    const workspace = await db.query.workspace.findFirst({
+      where(fields, operators) {
+        return operators.eq(fields.id, workspaceId)
+      },
+    })
+    if (!workspace) return { workspace: null }
+    return {
+      workspace: {
+        ...workspace,
+        isAdmin: isMember.role === 'admin',
+        isCreator: workspace.userId === userId,
+      },
+    }
   })
 
 export const createWorkspace = createServerFn({ method: 'POST' })

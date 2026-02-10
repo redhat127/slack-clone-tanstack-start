@@ -3,8 +3,8 @@ import {
   workspacesQueryOptions,
 } from '@/query-options/workspace'
 import { deleteWorkspace, getUserWorkspaces } from '@/serverFn/workspace'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { useRouteContext } from '@tanstack/react-router'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { DoorOpen, TrashIcon } from 'lucide-react'
 import { Suspense, useState } from 'react'
@@ -36,7 +36,7 @@ const WorkspaceListSkeleton = () => {
 
 const DeleteWorkspace = ({ workspaceId }: { workspaceId: string }) => {
   const [isPending, setIsPending] = useState(false)
-  const { queryClient } = useRouteContext({ from: '__root__' })
+  const queryClient = useQueryClient()
   return (
     <Tooltip
       content="Delete"
@@ -92,15 +92,30 @@ const WorkspaceListSuspense = () => {
       {workspaces.map((workspace) => (
         <Card key={workspace.id}>
           <CardHeader className="gap-0 flex items-center justify-between gap-x-4">
-            <CardTitle>
+            <CardTitle className="flex items-center gap-2">
               <h2 className="font-bold capitalize">{workspace.name}</h2>
+              {workspace.isCreator && (
+                <span className="text-xs font-semibold bg-primary text-primary-foreground px-2 py-0.5 rounded">
+                  Creator
+                </span>
+              )}
+              {workspace.isAdmin && !workspace.isCreator && (
+                <span className="text-xs font-semibold bg-secondary text-secondary-foreground px-2 py-0.5 rounded">
+                  Admin
+                </span>
+              )}
             </CardTitle>
             <div className="flex items-center gap-2">
               <Tooltip
                 content="Enter"
                 trigger={
-                  <Button type="button" size="icon-sm" variant="outline">
-                    <DoorOpen />
+                  <Button asChild size="icon-sm" variant="outline">
+                    <Link
+                      to="/workspace/$workspaceId"
+                      params={{ workspaceId: workspace.id }}
+                    >
+                      <DoorOpen />
+                    </Link>
                   </Button>
                 }
               />

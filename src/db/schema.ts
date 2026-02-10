@@ -1,6 +1,13 @@
 import type { InferSelectModel } from 'drizzle-orm'
 import { relations } from 'drizzle-orm'
-import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+} from 'drizzle-orm/pg-core'
 import { customAlphabet, nanoid } from 'nanoid'
 
 export const user = pgTable('user', {
@@ -83,6 +90,7 @@ export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   workspaces: many(workspace),
+  members: many(member),
 }))
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -127,9 +135,52 @@ export const workspace = pgTable(
   (table) => [index('workspace_userId_idx').on(table.userId)],
 )
 
-export const workspaceRelations = relations(workspace, ({ one }) => ({
+export type WorkspaceSelect = InferSelectModel<typeof workspace>
+
+export const workspaceRelations = relations(workspace, ({ one, many }) => ({
   user: one(user, {
     fields: [workspace.userId],
     references: [user.id],
+  }),
+  members: many(member),
+}))
+
+export const member = pgTable(
+  'member',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
+    role: text('role', { enum: ['admin', 'member'] })
+      .notNull()
+      .default('member'),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    workspaceId: text('workspace_id')
+      .notNull()
+      .references(() => workspace.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    unique('member_userId_workspaceId_unique_idx').on(
+      table.userId,
+      table.workspaceId,
+    ),
+  ],
+)
+
+export const memberRelations = relations(member, ({ one }) => ({
+  user: one(user, {
+    fields: [member.userId],
+    references: [user.id],
+  }),
+  workspace: one(workspace, {
+    fields: [member.workspaceId],
+    references: [workspace.id],
   }),
 }))
