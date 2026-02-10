@@ -1,5 +1,4 @@
 // create-workspace-dialog.tsx
-import { Tooltip } from '@/components/tooltip'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -8,22 +7,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import { workspacesQueryKey } from '@/query-options/workspace'
 import { createWorkspace } from '@/serverFn/workspace'
 import { createWorkspaceSchema } from '@/zod-schema/workspace/create-workspace'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouteContext } from '@tanstack/react-router'
-import { PlusIcon } from 'lucide-react'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { SubmitBtn } from '../submit-btn'
 import { TextInput } from '../text-input'
 import { FieldGroup } from '../ui/field'
 
-export const CreateWorkspaceDialog = () => {
+export const CreateWorkspaceDialog = ({ trigger }: { trigger: ReactNode }) => {
   const { queryClient } = useRouteContext({ from: '/_auth/workspace' })
   const [isOpen, setIsOpen] = useState(false)
   const form = useForm({
@@ -38,17 +35,7 @@ export const CreateWorkspaceDialog = () => {
   }
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <Tooltip
-        trigger={
-          <DialogTrigger asChild>
-            <Button type="button" size="icon-sm">
-              <PlusIcon />
-            </Button>
-          </DialogTrigger>
-        }
-        content="Create Workspace"
-        side="right"
-      />
+      {trigger}
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-base">Create Workspace</DialogTitle>
