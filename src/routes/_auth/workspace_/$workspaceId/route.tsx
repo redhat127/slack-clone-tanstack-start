@@ -6,7 +6,7 @@ import { WorkspaceBtnDropdown } from '@/components/workspace/workspace-btn-dropd
 import { capitalizeWords, pageTitle } from '@/lib/utils'
 import { getUserWorkspace } from '@/serverFn/workspace'
 import { createFileRoute, Link, notFound, Outlet } from '@tanstack/react-router'
-import { ChevronLeftIcon } from 'lucide-react'
+import { ChevronLeftIcon, HomeIcon } from 'lucide-react'
 
 export const Route = createFileRoute('/_auth/workspace_/$workspaceId')({
   component: RouteComponent,
@@ -48,6 +48,23 @@ function RouteComponent() {
           />
           <div className="mt-4">
             <WorkspaceBtnDropdown />
+          </div>
+
+          <div className="mt-4">
+            <Tooltip
+              trigger={
+                <Button asChild variant="outline" size="icon-sm">
+                  <Link
+                    to="/workspace/$workspaceId"
+                    params={{ workspaceId: workspace.id }}
+                  >
+                    <HomeIcon />
+                  </Link>
+                </Button>
+              }
+              side="right"
+              content="Home"
+            />
           </div>
         </>
       }
