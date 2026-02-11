@@ -143,6 +143,7 @@ export const workspaceRelations = relations(workspace, ({ one, many }) => ({
     references: [user.id],
   }),
   members: many(member),
+  channels: many(channel),
 }))
 
 export const member = pgTable(
@@ -181,6 +182,34 @@ export const memberRelations = relations(member, ({ one }) => ({
   }),
   workspace: one(workspace, {
     fields: [member.workspaceId],
+    references: [workspace.id],
+  }),
+}))
+
+export const channel = pgTable(
+  'channel',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
+    name: text('name').notNull(),
+    workspaceId: text('workspace_id')
+      .notNull()
+      .references(() => workspace.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index('channel_workspaceId_idx').on(table.workspaceId)],
+)
+
+export type ChannelSelect = InferSelectModel<typeof channel>
+
+export const channelRelations = relations(channel, ({ one }) => ({
+  workspace: one(workspace, {
+    fields: [channel.workspaceId],
     references: [workspace.id],
   }),
 }))

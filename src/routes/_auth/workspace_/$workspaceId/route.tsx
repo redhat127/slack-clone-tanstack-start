@@ -1,3 +1,4 @@
+import { ChannelList } from '@/components/channel/channel-list'
 import { WorkspaceLayout } from '@/components/layout/workspace-layout'
 import { Tooltip } from '@/components/tooltip'
 import { Button } from '@/components/ui/button'
@@ -29,6 +30,7 @@ export const Route = createFileRoute('/_auth/workspace_/$workspaceId')({
 })
 
 function RouteComponent() {
+  const { workspace } = Route.useLoaderData()
   return (
     <WorkspaceLayout
       asideChildren={
@@ -50,7 +52,9 @@ function RouteComponent() {
         </>
       }
     >
-      {null}
+      <div className="bg-white w-64 h-screen p-4 fixed">
+        <ChannelList workspaceId={workspace.id} />
+      </div>
     </WorkspaceLayout>
   )
 }

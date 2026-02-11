@@ -1,4 +1,5 @@
 import { authClient } from '@/lib/auth-client'
+import { workspacePrefixQueryKeyString } from '@/query-options/channel'
 import { workspacesQueryKey } from '@/query-options/workspace'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
@@ -27,6 +28,9 @@ export const LogoutForm = () => {
             navigate({ to: '/', replace: true })
             queryClient.removeQueries({
               queryKey: workspacesQueryKey,
+            })
+            queryClient.removeQueries({
+              queryKey: [workspacePrefixQueryKeyString],
             })
           }
         } catch {

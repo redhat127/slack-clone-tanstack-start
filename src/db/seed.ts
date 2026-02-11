@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
 import { db } from '.'
-import { member, user, workspace } from './schema'
+import { channel, member, user, workspace } from './schema'
 
 async function main() {
   console.log('✅ seed started.')
@@ -87,8 +87,26 @@ async function main() {
 
   console.log(`✅ total of ${memberResult.rowCount} members have been added.`)
 
+  console.log('🚀 adding channels to workspaces...')
+
+  const channelValues = workspaces.flatMap((ws) => [
+    {
+      name: 'general',
+      workspaceId: ws.id,
+    },
+    {
+      name: 'random',
+      workspaceId: ws.id,
+    },
+  ])
+
+  const channelResult = await db.insert(channel).values(channelValues)
+
+  console.log(`✅ total of ${channelResult.rowCount} channels have been added.`)
+
   console.log('\n📊 Summary:')
   console.log('Total workspaces: 4')
+  console.log('Total channels: 8 (2 per workspace: #general and #random)')
   console.log(
     "Dave: 2 creator (admin), 1 admin (on Rock's workspace), 1 member (on Rock's workspace)",
   )
