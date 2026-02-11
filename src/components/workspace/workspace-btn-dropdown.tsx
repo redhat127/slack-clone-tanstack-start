@@ -1,4 +1,5 @@
-import { getRouteApi } from '@tanstack/react-router'
+import { useDeleteWorkspace } from '@/hooks/workspace/use-delete-workspace'
+import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { SettingsIcon, TrashIcon } from 'lucide-react'
 import { Tooltip } from '../tooltip'
 import { Button } from '../ui/button'
@@ -38,13 +39,13 @@ export const WorkspaceBtnDropdown = () => {
             <p className="capitalize max-w-32 truncate">{workspace.name}</p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <WorkspacePreferences />
-        </DropdownMenuItem>
-        <DropdownMenuItem className="text-destructive hover:text-destructive!">
-          <DeleteWorkspace />
-        </DropdownMenuItem>
+        {workspace.isCreator && (
+          <>
+            <DropdownMenuSeparator />
+            <WorkspacePreferences />
+            <DeleteWorkspace workspaceId={workspace.id} />
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -52,18 +53,29 @@ export const WorkspaceBtnDropdown = () => {
 
 const WorkspacePreferences = () => {
   return (
-    <>
+    <DropdownMenuItem>
       <SettingsIcon />
       Preferences
-    </>
+    </DropdownMenuItem>
   )
 }
 
-const DeleteWorkspace = () => {
+const DeleteWorkspace = ({ workspaceId }: { workspaceId: string }) => {
+  const navigate = useNavigate()
+  const { isPending, deleteFn } = useDeleteWorkspace({
+    workspaceId,
+    onSuccess() {
+      navigate({ to: '/workspace', replace: true })
+    },
+  })
   return (
-    <>
+    <DropdownMenuItem
+      className="text-destructive hover:text-destructive!"
+      disabled={isPending}
+      onClick={deleteFn}
+    >
       <TrashIcon className="text-inherit" />
       Delete Workspace
-    </>
+    </DropdownMenuItem>
   )
 }

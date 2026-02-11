@@ -1,14 +1,11 @@
-import {
-  workspacesQueryKey,
-  workspacesQueryOptions,
-} from '@/query-options/workspace'
-import { deleteWorkspace, getUserWorkspaces } from '@/serverFn/workspace'
-import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useDeleteWorkspace } from '@/hooks/workspace/use-delete-workspace'
+import { workspacesQueryOptions } from '@/query-options/workspace'
+import { getUserWorkspaces } from '@/serverFn/workspace'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { DoorOpen, TrashIcon } from 'lucide-react'
-import { Suspense, useState } from 'react'
-import { toast } from 'sonner'
+import { Suspense } from 'react'
 import { Tooltip } from '../tooltip'
 import { Button } from '../ui/button'
 import { Card, CardHeader, CardTitle } from '../ui/card'
@@ -35,8 +32,7 @@ const WorkspaceListSkeleton = () => {
 }
 
 const DeleteWorkspace = ({ workspaceId }: { workspaceId: string }) => {
-  const [isPending, setIsPending] = useState(false)
-  const queryClient = useQueryClient()
+  const { isPending, deleteFn } = useDeleteWorkspace({ workspaceId })
   return (
     <Tooltip
       content="Delete"
@@ -47,29 +43,7 @@ const DeleteWorkspace = ({ workspaceId }: { workspaceId: string }) => {
           variant="outline"
           size="icon-sm"
           className="text-destructive hover:text-destructive"
-          onClick={async () => {
-            if (confirm('Are you sure you want to delete this workspace?')) {
-              setIsPending(true)
-              try {
-                const response = await deleteWorkspace({
-                  data: { workspaceId },
-                })
-                if (response.failed) {
-                  toast.error('Failed to delete workspace. try again.')
-                  return
-                }
-                toast.success('Workspace deleted.')
-                queryClient.invalidateQueries({
-                  queryKey: workspacesQueryKey,
-                  exact: true,
-                })
-              } catch {
-                toast.error('Failed to delete workspace. try again.')
-              } finally {
-                setIsPending(false)
-              }
-            }
-          }}
+          onClick={deleteFn}
         >
           <TrashIcon />
         </Button>
@@ -119,7 +93,9 @@ const WorkspaceListSuspense = () => {
                   </Button>
                 }
               />
-              <DeleteWorkspace workspaceId={workspace.id} />
+              {workspace.isCreator && (
+                <DeleteWorkspace workspaceId={workspace.id} />
+              )}
             </div>
           </CardHeader>
         </Card>
