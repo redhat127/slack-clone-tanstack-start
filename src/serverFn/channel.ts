@@ -25,13 +25,13 @@ export const getChannel = createServerFn({ method: 'GET' })
         },
       })
       if (!isMember) return null
-      const channel = await db.query.channel.findFirst({
+      const result = await db.query.channel.findFirst({
         where(fields, operators) {
           return operators.eq(fields.id, channelId)
         },
       })
-      if (!channel) return null
-      return { ...channel, isWorkspaceAdmin: isMember.role === 'admin' }
+      if (!result) return null
+      return { ...result, isWorkspaceAdmin: isMember.role === 'admin' }
     },
   )
 

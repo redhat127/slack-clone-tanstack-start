@@ -6,7 +6,8 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { HashIcon, PlusIcon } from 'lucide-react'
-import { ReactNode, Suspense, useState } from 'react'
+import { Suspense, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { SubmitBtn } from '../submit-btn'
@@ -92,7 +93,7 @@ const CreateChannelForm = ({
   closeDialog,
 }: {
   workspaceId: string
-  closeDialog(): void
+  closeDialog: () => void
 }) => {
   const form = useForm({
     resolver: zodResolver(createChannelSchema),
@@ -157,11 +158,12 @@ const ChannelListSuspense = ({ workspaceId }: { workspaceId: string }) => {
   const { data: channels } = useSuspenseQuery({
     ...queryOptions,
     async queryFn({ signal }) {
-      const { channels } = await getWorkspaceChannelsFn({
-        signal,
-        data: { workspaceId },
-      })
-      return channels
+      return (
+        await getWorkspaceChannelsFn({
+          signal,
+          data: { workspaceId },
+        })
+      ).channels
     },
   })
   const navigate = useNavigate()

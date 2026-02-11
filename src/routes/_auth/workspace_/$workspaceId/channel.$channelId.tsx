@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { FieldGroup } from '@/components/ui/field'
-import { ChannelSelect } from '@/db/schema'
+import type { ChannelSelect } from '@/db/schema'
 import { capitalizeWords, pageTitle } from '@/lib/utils'
 import { channelsQueryKey } from '@/query-options/channel'
 import { deleteChannel, getChannel, updateChannel } from '@/serverFn/channel'

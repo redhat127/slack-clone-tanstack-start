@@ -113,7 +113,7 @@ const UpdateWorkspace = ({
 }: {
   workspaceId: string
   workspaceName: string
-  closeDialog(): void
+  closeDialog: () => void
 }) => {
   const form = useForm({
     resolver: zodResolver(createWorkspaceSchema),

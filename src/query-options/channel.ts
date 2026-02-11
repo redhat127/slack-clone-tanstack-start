@@ -1,4 +1,4 @@
-import { getWorkspaceChannels } from '@/serverFn/channel'
+import type { getWorkspaceChannels } from '@/serverFn/channel'
 import { queryOptions } from '@tanstack/react-query'
 
 export const workspacePrefixQueryKeyString = 'workspace'
