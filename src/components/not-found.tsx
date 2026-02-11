@@ -20,10 +20,10 @@ export const NotFound = () => {
           <Button
             className="mt-4 w-full"
             onClick={() => {
-              navigate({ to: '..' })
+              navigate({ to: '/workspace' })
             }}
           >
-            Go back
+            Back to Your Workspaces
           </Button>
         </CardContent>
       </Card>

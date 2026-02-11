@@ -5,6 +5,34 @@ import { channelNameZodSchema } from '@/zod-schema/channel/create-channel'
 import { createServerFn } from '@tanstack/react-start'
 import z from 'zod'
 
+export const getChannel = createServerFn({ method: 'GET' })
+  .middleware([isAuthenticated])
+  .inputValidator(
+    z.object({
+      workspaceId: z.string(),
+      channelId: z.string(),
+    }),
+  )
+  .handler(
+    async ({ data: { workspaceId, channelId }, context: { userId } }) => {
+      const isMember = await db.query.member.findFirst({
+        where(fields, operators) {
+          return operators.and(
+            operators.eq(fields.workspaceId, workspaceId),
+            operators.eq(fields.userId, userId),
+          )
+        },
+      })
+      if (!isMember) return null
+      const channel = await db.query.channel.findFirst({
+        where(fields, operators) {
+          return operators.eq(fields.id, channelId)
+        },
+      })
+      return channel
+    },
+  )
+
 export const getWorkspaceChannels = createServerFn({ method: 'GET' })
   .middleware([isAuthenticated])
   .inputValidator(

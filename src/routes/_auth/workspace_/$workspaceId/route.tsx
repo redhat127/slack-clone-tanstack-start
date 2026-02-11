@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { WorkspaceBtnDropdown } from '@/components/workspace/workspace-btn-dropdown'
 import { capitalizeWords, pageTitle } from '@/lib/utils'
 import { getUserWorkspace } from '@/serverFn/workspace'
-import { createFileRoute, Link, notFound } from '@tanstack/react-router'
+import { createFileRoute, Link, notFound, Outlet } from '@tanstack/react-router'
 import { ChevronLeftIcon } from 'lucide-react'
 
 export const Route = createFileRoute('/_auth/workspace_/$workspaceId')({
@@ -52,9 +52,11 @@ function RouteComponent() {
         </>
       }
     >
-      <div className="bg-white w-64 h-screen p-4 fixed">
+      <div className="bg-white w-64 h-screen p-4 fixed border-r">
         <ChannelList workspaceId={workspace.id} />
       </div>
+
+      <Outlet />
     </WorkspaceLayout>
   )
 }

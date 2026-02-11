@@ -3,6 +3,7 @@ import { createChannel, getWorkspaceChannels } from '@/serverFn/channel'
 import { createChannelSchema } from '@/zod-schema/channel/create-channel'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { HashIcon, PlusIcon } from 'lucide-react'
 import { ReactNode, Suspense, useState } from 'react'
@@ -163,10 +164,20 @@ const ChannelListSuspense = ({ workspaceId }: { workspaceId: string }) => {
       return channels
     },
   })
+  const navigate = useNavigate()
   return channels.length > 0 ? (
     <div className="flex flex-col gap-1">
       {channels.map((channel) => (
         <button
+          onClick={() => {
+            navigate({
+              to: '/workspace/$workspaceId/channel/$channelId',
+              params: {
+                workspaceId,
+                channelId: channel.id,
+              },
+            })
+          }}
           key={channel.id}
           className="hover:bg-gray-100 transition-colors p-1 px-2 rounded w-full text-left"
         >
