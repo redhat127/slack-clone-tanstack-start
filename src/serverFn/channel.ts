@@ -81,14 +81,14 @@ export const createChannel = createServerFn({ method: 'POST' })
       },
     })
     if (!isMember || isMember.role === 'member') return { failed: true }
-    const [newChannelId] = await db
+    const [newChannel] = await db
       .insert(channel)
       .values({
         name,
         workspaceId,
       })
       .returning({ id: channel.id })
-    return { newChannelId, failed: false }
+    return { newChannelId: newChannel.id, failed: false }
   })
 
 export const updateChannel = createServerFn({ method: 'POST' })

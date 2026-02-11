@@ -13,6 +13,7 @@ import { createWorkspace } from '@/serverFn/workspace'
 import { createWorkspaceSchema } from '@/zod-schema/workspace/create-workspace'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -34,6 +35,7 @@ export const CreateWorkspaceDialog = ({ trigger }: { trigger: ReactNode }) => {
     setIsOpen(false)
     form.reset()
   }
+  const navigate = useNavigate()
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {trigger}
@@ -48,12 +50,16 @@ export const CreateWorkspaceDialog = ({ trigger }: { trigger: ReactNode }) => {
           onSubmit={form.handleSubmit(async (data) => {
             setIsPending(true)
             try {
-              await createWorkspace({ data })
+              const { newWorkspaceId } = await createWorkspace({ data })
               closeDialog()
               toast.success('Workspace created.')
               queryClient.invalidateQueries({
                 queryKey: workspacesQueryKey,
                 exact: true,
+              })
+              navigate({
+                to: '/workspace/$workspaceId',
+                params: { workspaceId: newWorkspaceId },
               })
             } catch {
               toast.error('Failed to create workspace. try again.')

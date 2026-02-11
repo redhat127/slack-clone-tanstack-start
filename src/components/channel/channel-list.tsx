@@ -6,8 +6,8 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { HashIcon, PlusIcon } from 'lucide-react'
-import { Suspense, useState } from 'react'
 import type { ReactNode } from 'react'
+import { Suspense, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { SubmitBtn } from '../submit-btn'
@@ -109,6 +109,7 @@ const CreateChannelForm = ({
   }
   const queryClient = useQueryClient()
   const queryKey = channelsQueryKey(workspaceId)
+  const navigate = useNavigate()
   return (
     <form
       onSubmit={form.handleSubmit(async (data) => {
@@ -127,6 +128,13 @@ const CreateChannelForm = ({
             exact: true,
           })
           closeDialog()
+          navigate({
+            to: '/workspace/$workspaceId/channel/$channelId',
+            params: {
+              workspaceId,
+              channelId: response.newChannelId,
+            },
+          })
         } catch {
           toast.error('Failed to create channel. try again.')
         } finally {

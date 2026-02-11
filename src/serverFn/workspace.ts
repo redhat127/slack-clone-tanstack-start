@@ -1,5 +1,5 @@
 import { db } from '@/db'
-import { workspace as workspaceTable } from '@/db/schema'
+import { member, workspace as workspaceTable } from '@/db/schema'
 import { isAuthenticated } from '@/middleware'
 import {
   createWorkspaceSchema,
@@ -92,6 +92,11 @@ export const createWorkspace = createServerFn({ method: 'POST' })
         userId,
       })
       .returning({ id: workspaceTable.id })
+    await db.insert(member).values({
+      userId,
+      workspaceId: newWorkspace.id,
+      role: 'admin',
+    })
     return { newWorkspaceId: newWorkspace.id }
   })
 
