@@ -1,7 +1,10 @@
 import { db } from '@/db'
 import { workspace as workspaceTable } from '@/db/schema'
 import { isAuthenticated } from '@/middleware'
-import { createWorkspaceSchema } from '@/zod-schema/workspace/create-workspace'
+import {
+  createWorkspaceSchema,
+  workspaceNameZodSchema,
+} from '@/zod-schema/workspace/create-workspace'
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq } from 'drizzle-orm'
 import z from 'zod'
@@ -102,6 +105,32 @@ export const deleteWorkspace = createServerFn({ method: 'POST' })
   .handler(async ({ context: { userId }, data: { workspaceId } }) => {
     const { rowCount } = await db
       .delete(workspaceTable)
+      .where(
+        and(
+          eq(workspaceTable.id, workspaceId),
+          eq(workspaceTable.userId, userId),
+        ),
+      )
+    if (rowCount === 1) {
+      return { failed: false }
+    }
+    return { failed: true }
+  })
+
+export const updateWorkspace = createServerFn({ method: 'POST' })
+  .middleware([isAuthenticated])
+  .inputValidator(
+    z.object({
+      workspaceId: z.string(),
+      name: workspaceNameZodSchema,
+    }),
+  )
+  .handler(async ({ context: { userId }, data: { workspaceId, name } }) => {
+    const { rowCount } = await db
+      .update(workspaceTable)
+      .set({
+        name,
+      })
       .where(
         and(
           eq(workspaceTable.id, workspaceId),
