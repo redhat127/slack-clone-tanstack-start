@@ -127,3 +127,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.ql-editor {
+  font-family: var(--font-inter) !important;
+}

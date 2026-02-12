@@ -1,5 +1,5 @@
-import type { InferSelectModel } from 'drizzle-orm'
-import { relations } from 'drizzle-orm'
+import type { InferInsertModel, InferSelectModel } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   boolean,
   index,
@@ -212,4 +212,57 @@ export const channelRelations = relations(channel, ({ one }) => ({
     fields: [channel.workspaceId],
     references: [workspace.id],
   }),
+}))
+
+export const message = pgTable(
+  'message',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
+    body: text('body').notNull(),
+    image: text('image'),
+    deleted: boolean('deleted').default(false).notNull(),
+    memberId: text('member_id')
+      .notNull()
+      .references(() => member.id, { onDelete: 'cascade' }),
+    channelId: text('channel_id')
+      .notNull()
+      .references(() => channel.id, { onDelete: 'cascade' }),
+    parentMessageId: text('parent_message_id'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index('message_channel_id_created_at_idx').on(
+      table.channelId,
+      table.createdAt,
+    ),
+    index('message_parent_message_id_created_at_idx')
+      .on(table.parentMessageId, table.createdAt)
+      .where(sql`parent_message_id IS NOT NULL`),
+  ],
+)
+
+export type MessageSelect = InferSelectModel<typeof message>
+export type MessageInsert = InferInsertModel<typeof message>
+
+export const messageRelations = relations(message, ({ one, many }) => ({
+  member: one(member, {
+    fields: [message.memberId],
+    references: [member.id],
+  }),
+  channel: one(channel, {
+    fields: [message.channelId],
+    references: [channel.id],
+  }),
+  parentMessage: one(message, {
+    fields: [message.parentMessageId],
+    references: [message.id],
+    relationName: 'thread',
+  }),
+  replies: many(message, { relationName: 'thread' }),
 }))

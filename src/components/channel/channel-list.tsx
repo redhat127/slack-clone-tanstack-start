@@ -1,6 +1,6 @@
 import { channelsQueryKey, channelsQueryOptions } from '@/query-options/channel'
 import { createChannel, getWorkspaceChannels } from '@/serverFn/channel'
-import { createChannelSchema } from '@/zod-schema/channel/create-channel'
+import { createChannelSchema } from '@/zod-schema/channel/create-channel-schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'

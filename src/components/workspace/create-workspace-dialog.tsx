@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { workspacesQueryKey } from '@/query-options/workspace'
 import { createWorkspace } from '@/serverFn/workspace'
-import { createWorkspaceSchema } from '@/zod-schema/workspace/create-workspace'
+import { createWorkspaceSchema } from '@/zod-schema/workspace/create-workspace-schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'

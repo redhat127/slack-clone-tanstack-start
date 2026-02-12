@@ -1,7 +1,7 @@
 import { useDeleteWorkspace } from '@/hooks/workspace/use-delete-workspace'
 import { workspacesQueryKey } from '@/query-options/workspace'
 import { updateWorkspace } from '@/serverFn/workspace'
-import { createWorkspaceSchema } from '@/zod-schema/workspace/create-workspace'
+import { createWorkspaceSchema } from '@/zod-schema/workspace/create-workspace-schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { getRouteApi, useNavigate, useRouter } from '@tanstack/react-router'

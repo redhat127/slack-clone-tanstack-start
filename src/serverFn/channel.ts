@@ -1,7 +1,7 @@
 import { db } from '@/db'
 import { channel } from '@/db/schema'
 import { isAuthenticated } from '@/middleware'
-import { channelNameZodSchema } from '@/zod-schema/channel/create-channel'
+import { channelNameZodSchema } from '@/zod-schema/channel/create-channel-schema'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 import z from 'zod'

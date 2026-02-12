@@ -4,7 +4,7 @@ import { isAuthenticated } from '@/middleware'
 import {
   createWorkspaceSchema,
   workspaceNameZodSchema,
-} from '@/zod-schema/workspace/create-workspace'
+} from '@/zod-schema/workspace/create-workspace-schema'
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq } from 'drizzle-orm'
 import z from 'zod'
