@@ -201,7 +201,6 @@ const MessageBody = ({ body }: { body: string }) => {
       quill.setContents(delta)
       containerRef.current.innerHTML = quill.root.innerHTML
     } catch {
-      // fallback for plain text
       containerRef.current.textContent = body
     }
   }, [body])
@@ -209,7 +208,24 @@ const MessageBody = ({ body }: { body: string }) => {
   return (
     <div
       ref={containerRef}
-      className="text-sm text-slate-700 leading-relaxed [&_strong]:font-semibold [&_em]:italic [&_s]:line-through [&_pre]:bg-slate-100 [&_pre]:rounded [&_pre]:p-2 [&_pre]:text-xs [&_ol]:list-decimal [&_ol]:pl-4 [&_ul]:list-disc [&_ul]:pl-4"
+      className="text-sm text-slate-700 leading-relaxed
+        [&_strong]:font-semibold
+        [&_em]:italic
+        [&_s]:line-through
+        [&_pre]:bg-slate-100
+        [&_pre]:rounded
+        [&_pre]:p-2
+        [&_pre]:text-xs
+        [&_ol]:list-decimal
+        [&_ol]:pl-4
+        [&_ul]:list-disc
+        [&_ul]:pl-4
+        [&_img]:inline
+        [&_img]:max-w-50
+        [&_img]:mr-2
+        [&_img]:mb-2
+        [&_img]:align-middle
+        [&_img]:rounded"
     />
   )
 }

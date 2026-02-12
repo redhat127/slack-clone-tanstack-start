@@ -221,7 +221,6 @@ export const message = pgTable(
       .primaryKey()
       .$defaultFn(() => nanoid()),
     body: text('body').notNull(),
-    image: text('image'),
     deleted: boolean('deleted').default(false).notNull(),
     memberId: text('member_id')
       .notNull()

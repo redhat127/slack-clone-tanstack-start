@@ -6,7 +6,6 @@ import { createMessageSchema } from '@/zod-schema/message/create-message-schema'
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq, isNull } from 'drizzle-orm'
 import z from 'zod'
-
 export const createMessage = createServerFn({ method: 'POST' })
   .middleware([isAuthenticated])
   .inputValidator(createMessageSchema)
