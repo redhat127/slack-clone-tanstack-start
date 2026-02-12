@@ -1,12 +1,17 @@
 import type { Messages } from '@/query-options/message'
 import { messagesQueryKey } from '@/query-options/message'
 import { createMessage } from '@/serverFn/message'
+import data from '@emoji-mart/data'
+import Picker from '@emoji-mart/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useParams } from '@tanstack/react-router'
+import { Smile } from 'lucide-react'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { Button } from './ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 
 export const ChatInput = () => {
   const editorRef = useRef<HTMLDivElement>(null)
@@ -18,9 +23,14 @@ export const ChatInput = () => {
   const queryClient = useQueryClient()
   const initializedRef = useRef(false)
   const queryKey = messagesQueryKey(workspaceId, channelId)
-  const handleSubmit = async () => {
+  const getQuill = () => {
     const quill = quillRef.current ?? Quill.find(editorRef.current!)
     if (!(quill instanceof Quill) || isPending) return
+    return quill
+  }
+  const handleSubmit = async () => {
+    const quill = getQuill()
+    if (!quill) return
     const delta = quill.getContents()
     const isEmpty = delta.ops.every(
       (op) => typeof op.insert === 'string' && op.insert.trim() === '',
@@ -90,8 +100,35 @@ export const ChatInput = () => {
   useEffect(() => {
     handleSubmitRef.current = handleSubmit
   })
+  const [open, setOpen] = useState(false)
   return (
-    <div className="rounded-md border border-slate-200 shadow-sm overflow-hidden">
+    <div className="overflow-hidden">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            className="mb-2"
+          >
+            <Smile />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0 border-none shadow-none">
+          <Picker
+            emojiSize={16}
+            previewPosition="none"
+            theme="light"
+            data={data}
+            onEmojiSelect={(data: { native: string }) => {
+              setOpen(false)
+              const quill = getQuill()
+              if (!quill) return
+              quill.insertText(quill.getSelection()?.index || 0, data.native)
+            }}
+          />
+        </PopoverContent>
+      </Popover>
       <div
         ref={editorRef}
         className="bg-white

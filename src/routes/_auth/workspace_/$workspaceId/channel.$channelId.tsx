@@ -216,7 +216,7 @@ const MessageBody = ({ body }: { body: string }) => {
 
 const ChatInputFallback = () => {
   return (
-    <div className="rounded-md border border-slate-200 shadow-sm overflow-hidden bg-white">
+    <div className="border border-slate-200 overflow-hidden bg-white">
       <div className="h-10.5 border-b border-slate-200 px-3 flex items-center gap-2">
         <Skeleton className="h-4 w-4 rounded-sm" />
         <Skeleton className="h-4 w-4 rounded-sm" />
