@@ -6,6 +6,7 @@ import {
   message,
   workspace as workspaceDbSchema,
 } from '@/db/schema'
+import { emitToChannel } from '@/lib/emit'
 import { isAuthenticated } from '@/middleware'
 import { createMessageSchema } from '@/zod-schema/message/create-message-schema'
 import { createServerFn } from '@tanstack/react-start'
@@ -58,6 +59,8 @@ export const createMessage = createServerFn({ method: 'POST' })
         },
       })
 
+      await emitToChannel(channelId, 'channel:newMessage', newMessage, userId)
+
       return {
         failed: false,
         newMessage: newMessage
@@ -65,7 +68,8 @@ export const createMessage = createServerFn({ method: 'POST' })
               ...newMessage,
               member: {
                 ...newMessage.member,
-                isCurrentMember: newMessage.memberId === currentMember.id,
+                isCurrentMember: true,
+                canDelete: true, // sender can always delete their own message
               },
             }
           : null,
@@ -104,13 +108,46 @@ export const getMessages = createServerFn({ method: 'GET' })
         orderBy: (m, { asc }) => asc(m.createdAt),
       })
 
-      const enriched = messages.map((m) => ({
-        ...m,
-        member: {
-          ...m.member,
-          isCurrentMember: m.member.id === currentMember.id,
-        },
-      }))
+      const targetWorkspace = await db.query.workspace.findFirst({
+        where: eq(workspaceDbSchema.id, workspaceId),
+      })
+
+      const targetChannel = await db.query.channel.findFirst({
+        where: and(
+          eq(channel.id, channelId),
+          eq(channel.workspaceId, workspaceId),
+        ),
+      })
+
+      const isWorkspaceCreator = targetWorkspace?.userId === userId
+      const isChannelCreator = targetChannel?.createdBy === userId
+
+      const enriched = messages.map((m) => {
+        const isOwnMessage = m.memberId === currentMember.id
+        const messageAuthorIsAdmin = m.member.role === 'admin'
+        const messageAuthorIsWorkspaceCreator =
+          targetWorkspace?.userId === m.member.userId
+
+        let canDelete = false
+        if (isOwnMessage) {
+          canDelete = true
+        } else if (isWorkspaceCreator) {
+          canDelete = true
+        } else if (isChannelCreator) {
+          canDelete = !messageAuthorIsWorkspaceCreator
+        } else if (currentMember.role === 'admin') {
+          canDelete = !messageAuthorIsAdmin && !messageAuthorIsWorkspaceCreator
+        }
+
+        return {
+          ...m,
+          member: {
+            ...m.member,
+            isCurrentMember: m.memberId === currentMember.id,
+            canDelete,
+          },
+        }
+      })
 
       return { messages: enriched }
     },
@@ -199,6 +236,8 @@ export const deleteMessage = createServerFn({ method: 'POST' })
         .update(message)
         .set({ deleted: true })
         .where(eq(message.id, messageId))
+
+      await emitToChannel(channelId, 'channel:deleteMessage', messageId, userId)
 
       return { failed: false }
     },

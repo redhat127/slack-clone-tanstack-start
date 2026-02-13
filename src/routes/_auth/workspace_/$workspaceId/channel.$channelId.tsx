@@ -15,6 +15,7 @@ import {
 import { FieldGroup } from '@/components/ui/field'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { ChannelSelect } from '@/db/schema'
+import { useSocket } from '@/hooks/use-socket'
 import { capitalizeWords, pageTitle } from '@/lib/utils'
 import { channelsQueryKey } from '@/query-options/channel'
 import { messagesQueryOptions } from '@/query-options/message'
@@ -146,7 +147,6 @@ const MessageListSuspense = ({
   const deleteMessageFn = useServerFn(deleteMessage)
   const queryClient = useQueryClient()
   const queryOptions = messagesQueryOptions(workspaceId, channelId)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const { data: messages } = useSuspenseQuery({
     ...queryOptions,
@@ -157,10 +157,42 @@ const MessageListSuspense = ({
     },
   })
 
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const prevLengthRef = useRef<number | null>(null)
+
   useEffect(() => {
-    if (!isSelfMessageRef.current) return
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    isSelfMessageRef.current = false
+    // on first load, just set the initial length without scrolling
+    if (prevLengthRef.current === null) {
+      prevLengthRef.current = messages.length
+      return
+    }
+
+    // scroll if current user sent the message
+    if (isSelfMessageRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      isSelfMessageRef.current = false
+      prevLengthRef.current = messages.length
+      return
+    }
+
+    // new message arrived from someone else
+    if (messages.length > prevLengthRef.current) {
+      // find the scrollable container (the div with overflow-auto in RouteComponent)
+      const end = messagesEndRef.current
+      const container = end?.closest('.overflow-auto') as HTMLElement | null
+      if (container) {
+        const isNearBottom =
+          container.scrollHeight -
+            container.scrollTop -
+            container.clientHeight <
+          200
+        if (isNearBottom) {
+          end?.scrollIntoView({ behavior: 'smooth' })
+        }
+      }
+    }
+
+    prevLengthRef.current = messages.length
   }, [messages])
 
   const handleDelete = async (messageId: string) => {
@@ -178,6 +210,32 @@ const MessageListSuspense = ({
       exact: true,
     })
   }
+
+  const socket = useSocket()
+
+  useEffect(() => {
+    socket.emit('channel:join', channelId)
+
+    socket.on('channel:newMessage', () => {
+      queryClient.invalidateQueries({
+        queryKey: queryOptions.queryKey,
+        exact: true,
+      })
+    })
+
+    socket.on('channel:deleteMessage', () => {
+      queryClient.invalidateQueries({
+        queryKey: queryOptions.queryKey,
+        exact: true,
+      })
+    })
+
+    return () => {
+      socket.emit('channel:leave', channelId)
+      socket.off('channel:newMessage')
+      socket.off('channel:deleteMessage')
+    }
+  }, [channelId])
 
   if (messages.length === 0) {
     return (
@@ -224,7 +282,7 @@ const MessageListSuspense = ({
           </div>
 
           {/* Delete button */}
-          {message.member.isCurrentMember && (
+          {message.member.canDelete && (
             <div className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5">
               <Tooltip
                 trigger={

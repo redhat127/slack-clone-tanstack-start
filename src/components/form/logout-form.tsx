@@ -1,3 +1,4 @@
+import { disconnectSocket } from '@/hooks/use-socket'
 import { authClient } from '@/lib/auth-client'
 import { workspacePrefixQueryKeyString } from '@/query-options/channel'
 import { workspacesQueryKey } from '@/query-options/workspace'
@@ -24,6 +25,7 @@ export const LogoutForm = () => {
             return
           }
           if (result.success) {
+            disconnectSocket()
             toast.success('You are logged out.')
             navigate({ to: '/', replace: true })
             queryClient.removeQueries({

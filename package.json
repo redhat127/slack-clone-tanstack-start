@@ -15,7 +15,8 @@
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "bun run ./src/db/seed.ts"
+    "db:seed": "bun run ./src/db/seed.ts",
+    "dev:socket": "bun --watch run src/socket/run.ts"
   },
   "dependencies": {
     "@emoji-mart/data": "^1.2.1",
@@ -39,6 +40,7 @@
     "clsx": "^2.1.1",
     "drizzle-kit": "^0.31.8",
     "drizzle-orm": "^0.45.0",
+    "express": "^5.2.1",
     "lucide-react": "^0.561.0",
     "nanoid": "^5.1.6",
     "next-themes": "^0.4.6",
@@ -50,6 +52,8 @@
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.71.1",
     "sharp": "^0.34.5",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.6",
@@ -62,6 +66,7 @@
     "@tanstack/eslint-config": "^0.3.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.10.2",
     "@types/pg": "^8.15.6",
     "@types/react": "^19.2.0",
