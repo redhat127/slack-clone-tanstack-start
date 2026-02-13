@@ -19,7 +19,7 @@ import { capitalizeWords, pageTitle } from '@/lib/utils'
 import { channelsQueryKey } from '@/query-options/channel'
 import { messagesQueryOptions } from '@/query-options/message'
 import { deleteChannel, getChannel, updateChannel } from '@/serverFn/channel'
-import { getMessages } from '@/serverFn/message'
+import { deleteMessage, getMessages } from '@/serverFn/message'
 import { createChannelSchema } from '@/zod-schema/channel/create-channel-schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
@@ -128,7 +128,10 @@ const MessageListSuspense = ({
   channelId: string
 }) => {
   const getChannelMessagesFn = useServerFn(getMessages)
+  const deleteMessageFn = useServerFn(deleteMessage)
+  const queryClient = useQueryClient()
   const queryOptions = messagesQueryOptions(workspaceId, channelId)
+
   const { data: messages } = useSuspenseQuery({
     ...queryOptions,
     async queryFn({ signal }) {
@@ -141,6 +144,22 @@ const MessageListSuspense = ({
     },
   })
 
+  const handleDelete = async (messageId: string) => {
+    if (!confirm('Delete this message?')) return
+    const response = await deleteMessageFn({
+      data: { messageId, workspaceId, channelId },
+    })
+    if (response.failed) {
+      toast.error('Failed to delete message.')
+      return
+    }
+    toast.success('Message deleted.')
+    queryClient.invalidateQueries({
+      queryKey: queryOptions.queryKey,
+      exact: true,
+    })
+  }
+
   if (messages.length === 0) {
     return (
       <p className="text-muted-foreground text-sm italic">No message found.</p>
@@ -150,7 +169,7 @@ const MessageListSuspense = ({
   return (
     <div className="flex flex-col gap-4">
       {messages.map((message) => (
-        <div key={message.id} className="flex items-start gap-3">
+        <div key={message.id} className="group flex items-start gap-3">
           {/* Avatar */}
           <div className="shrink-0 w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-sm font-semibold text-slate-600 uppercase">
             {message.member.user.image ? (
@@ -165,7 +184,7 @@ const MessageListSuspense = ({
           </div>
 
           {/* Content */}
-          <div className="flex flex-col gap-0.5 min-w-0">
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
             <div className="flex items-baseline gap-2">
               <span className="font-semibold text-sm text-slate-800">
                 {message.member.user.name}
@@ -184,6 +203,27 @@ const MessageListSuspense = ({
               <MessageBody body={message.body} />
             </ClientOnly>
           </div>
+
+          {/* Delete button */}
+          {message.member.isCurrentMember && (
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5">
+              <Tooltip
+                trigger={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-destructive"
+                    onClick={() => handleDelete(message.id)}
+                  >
+                    <TrashIcon />
+                  </Button>
+                }
+                side="left"
+                content="Delete message"
+              />
+            </div>
+          )}
         </div>
       ))}
     </div>

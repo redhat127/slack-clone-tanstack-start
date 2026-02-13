@@ -93,10 +93,12 @@ async function main() {
     {
       name: 'general',
       workspaceId: ws.id,
+      createdBy: ws.userId,
     },
     {
       name: 'random',
       workspaceId: ws.id,
+      createdBy: ws.userId,
     },
   ])
 
