@@ -193,11 +193,11 @@ export const ChatInput = ({
               previewPosition="none"
               theme="light"
               data={data}
-              onEmojiSelect={(data: { native: string }) => {
+              onEmojiSelect={({ native }: { native: string }) => {
                 setOpen(false)
                 const quill = getQuill()
                 if (!quill) return
-                quill.insertText(quill.getSelection()?.index || 0, data.native)
+                quill.insertText(quill.getSelection()?.index || 0, native)
               }}
             />
           </PopoverContent>

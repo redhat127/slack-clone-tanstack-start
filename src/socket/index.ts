@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
 import express from 'express'
-import { createServer } from 'http'
+import { createServer } from 'node:http'
 import { Server } from 'socket.io'
 
 const app = express()
