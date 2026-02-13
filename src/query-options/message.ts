@@ -19,6 +19,6 @@ export const messagesQueryOptions = (
   const queryKey = messagesQueryKey(workspaceId, channelId)
   return queryOptions<Messages>({
     queryKey,
-    staleTime: 60 * 60 * 1000, // 60 minutes
+    staleTime: 30 * 1000, // 30 seconds
   })
 }

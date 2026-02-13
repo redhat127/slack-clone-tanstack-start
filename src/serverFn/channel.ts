@@ -86,6 +86,7 @@ export const createChannel = createServerFn({ method: 'POST' })
       .values({
         name,
         workspaceId,
+        createdBy: userId,
       })
       .returning({ id: channel.id })
     return { newChannelId: newChannel.id, failed: false }

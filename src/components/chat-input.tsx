@@ -44,7 +44,11 @@ class LinkedImage extends ImageBlot {
 
 Quill.register(LinkedImage, true)
 
-export const ChatInput = () => {
+export const ChatInput = ({
+  onMessageSent,
+}: {
+  onMessageSent?: () => void
+}) => {
   const editorRef = useRef<HTMLDivElement>(null)
   const quillRef = useRef<Quill | null>(null)
   const [isPending, setIsPending] = useState(false)
@@ -88,6 +92,7 @@ export const ChatInput = () => {
 
       const { newMessage } = response
       if (newMessage) {
+        onMessageSent?.() // ← add this before setQueryData
         queryClient.setQueryData<Messages>(queryKey, (old) => [
           ...(old ?? []),
           newMessage,

@@ -62,6 +62,8 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const { channel } = Route.useLoaderData()
+  const isSelfMessageRef = useRef(false) // ← add this
+
   return (
     <div className="flex flex-col h-svh ml-64">
       <div className="flex-none px-4 pt-4 bg-white border-b pb-4">
@@ -76,23 +78,34 @@ function RouteComponent() {
         )}
       </div>
       <div className="flex-1 min-h-0 overflow-auto p-4 bg-white">
-        <MessagesList channel={channel} />
+        <MessagesList channel={channel} isSelfMessageRef={isSelfMessageRef} />
       </div>
       <div className="flex-none p-4 bg-white border-t">
         <ClientOnly fallback={<ChatInputFallback />}>
-          <ChatInput />
+          <ChatInput
+            onMessageSent={() => {
+              isSelfMessageRef.current = true
+            }}
+          />
         </ClientOnly>
       </div>
     </div>
   )
 }
 
-const MessagesList = ({ channel }: { channel: ChannelSelect }) => {
+const MessagesList = ({
+  channel,
+  isSelfMessageRef,
+}: {
+  channel: ChannelSelect
+  isSelfMessageRef: React.RefObject<boolean>
+}) => {
   return (
     <Suspense fallback={<MessagesListSkeleton />}>
       <MessageListSuspense
         workspaceId={channel.workspaceId}
         channelId={channel.id}
+        isSelfMessageRef={isSelfMessageRef}
       />
     </Suspense>
   )
@@ -123,26 +136,32 @@ const MessagesListSkeleton = () => {
 const MessageListSuspense = ({
   workspaceId,
   channelId,
+  isSelfMessageRef,
 }: {
   workspaceId: string
   channelId: string
+  isSelfMessageRef: React.RefObject<boolean>
 }) => {
   const getChannelMessagesFn = useServerFn(getMessages)
   const deleteMessageFn = useServerFn(deleteMessage)
   const queryClient = useQueryClient()
   const queryOptions = messagesQueryOptions(workspaceId, channelId)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const { data: messages } = useSuspenseQuery({
     ...queryOptions,
     async queryFn({ signal }) {
       return (
-        await getChannelMessagesFn({
-          signal,
-          data: { workspaceId, channelId },
-        })
+        await getChannelMessagesFn({ signal, data: { workspaceId, channelId } })
       ).messages
     },
   })
+
+  useEffect(() => {
+    if (!isSelfMessageRef.current) return
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    isSelfMessageRef.current = false
+  }, [messages])
 
   const handleDelete = async (messageId: string) => {
     if (!confirm('Delete this message?')) return
@@ -226,6 +245,7 @@ const MessageListSuspense = ({
           )}
         </div>
       ))}
+      <div ref={messagesEndRef} />
     </div>
   )
 }

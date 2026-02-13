@@ -6,5 +6,5 @@ export const workspacesQueryKey = ['workspaces']
 export const workspacesQueryOptions = () =>
   queryOptions<Awaited<ReturnType<typeof getUserWorkspaces>>>({
     queryKey: workspacesQueryKey,
-    staleTime: 60 * 60 * 1000, // 60 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes
   })
